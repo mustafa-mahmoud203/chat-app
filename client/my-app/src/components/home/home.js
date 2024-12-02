@@ -14,14 +14,19 @@ const Home = () => {
 
   useEffect(() => {
     socket = io(ENDPOINT);
-    socket.on('room-created', (roomName) => {
-      console.log(`Room created: ${roomName}`);
-      setRooms((prevRooms) => [...prevRooms, roomName]); // Update rooms list
+
+    socket.on("all-rooms", (allRooms) => {
+      setRooms(allRooms)
+    })
+    socket.on('room-created', (newRoom) => {
+      console.log('Room created: ', JSON.stringify(newRoom));
+      setRooms((prevRooms) => [...prevRooms, newRoom]); // Update rooms list
     });
+
     return () => {
       socket.disconnect();
-    }
-  }, [])
+    };
+  }, []);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -34,20 +39,9 @@ const Home = () => {
     setRoom('');
 
   }
-
-  const domyrooms = [
-    {
-      name: 'room1',
-      _id: '123'
-    },
-    {
-      name: 'room2',
-      _id: '456'
-    }
-  ]
   const setAsMustafa = () => {
     const data = {
-      id: 123,
+      id: 1000,
       name: "mustafa",
       age: 24,
       email: "mustafa@gamil.com"
@@ -56,7 +50,7 @@ const Home = () => {
   }
   const setAsHager = () => {
     const data = {
-      id: 124,
+      id: 2000,
       name: "Hager",
       age: 10,
       email: "Hager@gamil.com"
@@ -92,11 +86,11 @@ const Home = () => {
           </div>
         </div>
         <div className="col s6 m5 offset-1">
-          <RoomList rooms={domyrooms} />
+          <RoomList rooms={rooms} />
         </div>
       </div>
 
-      <Link to={'/chat'}>
+      <Link to={'/chat/:room_id/:room_name'}>
         <button>go to chat</button>
       </Link>
     </div>

@@ -8,12 +8,15 @@
     "baseUrl": "./",
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "types": [
+      "node"
+    ],
     "outDir": "./dist",
     "rootDir": "./"
   },
   "include": [
     "*.ts",
-    "src/**/*"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules"

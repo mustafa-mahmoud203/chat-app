@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import Helper from '../../helper.js';
 import RoomController from '../controllers/room.js';
 import MessageController from '../controllers/message.js';
+import CustomError, { AppError } from '../utils/customError.js';
 
 class SocketHandlers {
     constructor(
@@ -21,17 +22,15 @@ class SocketHandlers {
             socket.emit('all-rooms', rooms);
 
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-            console.log(`Failed to create room: ${errorMessage}`);
-            socket.emit('error', `Failed to create room: ${errorMessage}`);
+            CustomError.handleError(socket, err)
         }
 
-        socket.on('create-room', async (roomName) => this.createRoom(roomName));
+        socket.on('create-room', async (roomName) => this.createRoom(roomName, socket));
         socket.on('join', async (joinData) => this.joinRoom(joinData, socket));
-        socket.on('sendMessage', async (messageData) => this.sendMessage(messageData));
+        socket.on('sendMessage', async (messageData) => this.sendMessage(messageData, socket));
         socket.on('disconnect', () => this.disconnect())
     }
-    private async createRoom(roomName: string) {
+    private async createRoom(roomName: string, socket: Socket) {
         try {
             const room = await this.roomController.createRoom(roomName)
             if (room) {
@@ -39,9 +38,8 @@ class SocketHandlers {
                 this.io.emit('room-created', room);
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-            console.log(`Failed to create room: ${errorMessage}`);
-            // socket.emit('error', `Failed to create room: ${errorMessage}`);
+            CustomError.handleError(socket, err)
+
         }
     }
     private async joinRoom(data: { name: string, room_id: string, user_id: string }, socket: Socket) {
@@ -50,8 +48,7 @@ class SocketHandlers {
                 socket_id: socket.id,
                 ...data
             });
-            if (error)
-                return console.log('join error', error);
+            if (error) throw new AppError(error.message || 'join error', 500)
 
             // Ensure user is in the correct room
             socket.join(data.room_id);
@@ -60,13 +57,11 @@ class SocketHandlers {
             socket.emit('all-messages', messages);
 
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-            console.log(`Failed to create room: ${errorMessage}`);
-            socket.emit('error', `Failed to create room: ${errorMessage}`);
+            CustomError.handleError(socket, err)
         }
     }
 
-    private async sendMessage(data: { message: string, room_id: string, user_id: string }) {
+    private async sendMessage(data: { message: string, room_id: string, user_id: string }, socket: Socket) {
         // const user = this.helper.getUser(socket.id);
         try {
             const newmessage = await this.messageController.SaveMessage(data)
@@ -74,9 +69,8 @@ class SocketHandlers {
                 this.io.to(data.room_id).emit('message', newmessage); // Emit to the specific room 
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-            console.log(`Failed to save message: ${errorMessage}`);
-            // socket.emit('error', `Failed to save message: ${errorMessage}`);
+            CustomError.handleError(socket, err)
+
         }
     }
 

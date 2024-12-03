@@ -13,7 +13,7 @@ export class AppError extends Error {
 
 class CustomError {
 
-    public handleError(socket: Socket, err: any): void {
+    public static handleError(socket: Socket, err: any): void {
         if (err instanceof AppError) {
             console.error(`AppError: ${err.message}`);
             socket.emit('error', {
@@ -30,4 +30,4 @@ class CustomError {
     }
 }
 
-export default new CustomError();
+export default CustomError;

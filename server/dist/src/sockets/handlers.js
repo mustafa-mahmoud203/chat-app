@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import CustomError, { AppError } from '../utils/customError.js';
 class SocketHandlers {
     constructor(io, roomController, messageController, helper) {
         this.io = io;
@@ -23,17 +24,15 @@ class SocketHandlers {
                 socket.emit('all-rooms', rooms);
             }
             catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                console.log(`Failed to create room: ${errorMessage}`);
-                socket.emit('error', `Failed to create room: ${errorMessage}`);
+                CustomError.handleError(socket, err);
             }
-            socket.on('create-room', (roomName) => __awaiter(this, void 0, void 0, function* () { return this.createRoom(roomName); }));
+            socket.on('create-room', (roomName) => __awaiter(this, void 0, void 0, function* () { return this.createRoom(roomName, socket); }));
             socket.on('join', (joinData) => __awaiter(this, void 0, void 0, function* () { return this.joinRoom(joinData, socket); }));
-            socket.on('sendMessage', (messageData) => __awaiter(this, void 0, void 0, function* () { return this.sendMessage(messageData); }));
+            socket.on('sendMessage', (messageData) => __awaiter(this, void 0, void 0, function* () { return this.sendMessage(messageData, socket); }));
             socket.on('disconnect', () => this.disconnect());
         });
     }
-    createRoom(roomName) {
+    createRoom(roomName, socket) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const room = yield this.roomController.createRoom(roomName);
@@ -43,9 +42,7 @@ class SocketHandlers {
                 }
             }
             catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                console.log(`Failed to create room: ${errorMessage}`);
-                // socket.emit('error', `Failed to create room: ${errorMessage}`);
+                CustomError.handleError(socket, err);
             }
         });
     }
@@ -54,20 +51,18 @@ class SocketHandlers {
             try {
                 const { error, user } = this.helper.addUser(Object.assign({ socket_id: socket.id }, data));
                 if (error)
-                    return console.log('join error', error);
+                    throw new AppError(error.message || 'join error', 500);
                 // Ensure user is in the correct room
                 socket.join(data.room_id);
                 const messages = (yield this.messageController.messages()) || [];
                 socket.emit('all-messages', messages);
             }
             catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                console.log(`Failed to create room: ${errorMessage}`);
-                socket.emit('error', `Failed to create room: ${errorMessage}`);
+                CustomError.handleError(socket, err);
             }
         });
     }
-    sendMessage(data) {
+    sendMessage(data, socket) {
         return __awaiter(this, void 0, void 0, function* () {
             // const user = this.helper.getUser(socket.id);
             try {
@@ -77,9 +72,7 @@ class SocketHandlers {
                 }
             }
             catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                console.log(`Failed to save message: ${errorMessage}`);
-                // socket.emit('error', `Failed to save message: ${errorMessage}`);
+                CustomError.handleError(socket, err);
             }
         });
     }

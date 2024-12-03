@@ -15,8 +15,14 @@ import 'dotenv/config';
 import Helper from './helper.js';
 import DataBaseConnection from "./database/connection.js";
 import RoomController from './src/controllers/room.js';
+import MessageController from './src/controllers/message.js';
+import SocketHandlers from './src/sockets/handlers.js';
 class App {
-    constructor() {
+    constructor(helper, dbconnection, roomController, messageController) {
+        this.helper = helper;
+        this.dbconnection = dbconnection;
+        this.roomController = roomController;
+        this.messageController = messageController;
         this.app = express();
         this.port = parseInt(process.env.PORT || '5000', 10);
         this.server = createServer(this.app);
@@ -27,15 +33,8 @@ class App {
                 allowedHeaders: ['Content-Type'],
             },
         });
-        this.helper = new Helper();
-        this.dbconnection = new DataBaseConnection();
-        this.roomController = new RoomController();
         this.setMiddleware();
         this.setSocketIOEvents();
-        this.setDataBaseConnection();
-    }
-    setDataBaseConnection() {
-        this.dbconnection.connectionDB();
     }
     setMiddleware() {
         this.app.use(cors({
@@ -45,64 +44,18 @@ class App {
         }));
     }
     setSocketIOEvents() {
-        this.io.on('connection', (socket) => __awaiter(this, void 0, void 0, function* () {
-            console.log('a user connected');
-            try {
-                const rooms = yield this.roomController.rooms();
-                if (rooms) {
-                    socket.emit('all-rooms', rooms);
-                }
-                else {
-                    socket.emit('all-rooms', []);
-                }
-            }
-            catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                console.log(`Failed to create room: ${errorMessage}`);
-                socket.emit('error', `Failed to create room: ${errorMessage}`);
-            }
-            socket.on('create-room', (roomName) => __awaiter(this, void 0, void 0, function* () {
-                try {
-                    const room = yield this.roomController.createRoom(roomName);
-                    if (room) {
-                        console.log("Room created:", room);
-                        this.io.emit('room-created', room);
-                    }
-                }
-                catch (err) {
-                    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-                    console.log(`Failed to create room: ${errorMessage}`);
-                    socket.emit('error', `Failed to create room: ${errorMessage}`);
-                }
-            }));
-            socket.on('join', ({ name, room_id, user_id }) => {
-                const data = { socket_id: socket.id, name, user_id, room_id };
-                const { error, user } = this.helper.addUser(data);
-                if (error) {
-                    console.log('join error', error);
-                }
-                else {
-                    console.log('join user', user);
-                    socket.join(room_id); // Ensure user is in the correct room
-                }
-            });
-            socket.on('sendMessage', ({ message, room_id, user_id }) => {
-                console.log('messageData  ', { message, room_id, user_id });
-                const user = this.helper.getUser(socket.id);
-                console.log(user);
-                const msgToStore = {
-                    room_id,
-                    text: message,
-                };
-                this.io.to(room_id).emit('message', msgToStore); // Emit to the specific room
-            });
-            socket.on('disconnect', () => {
-                console.log('A user disconnected');
-            });
-        }));
+        new SocketHandlers(this.io, this.roomController, this.messageController, this.helper);
     }
     start() {
-        this.server.listen(this.port, () => console.log(`Server listening on port ${this.port}!`));
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield this.dbconnection.connectionDB();
+                this.server.listen(this.port, () => console.log(`Server listening on port ${this.port}!`));
+            }
+            catch (err) {
+                console.error('Failed to start server:', err);
+            }
+        });
     }
 }
-new App().start();
+new App(new Helper(), new DataBaseConnection(), new RoomController(), new MessageController()).start();

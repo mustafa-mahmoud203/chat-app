@@ -1,13 +1,14 @@
+// Chat.js
 import React, { useContext, useEffect, useState } from 'react';
 import UserContext from '../../UserContext';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
+import Messages from './messages';
 
 let socket;
 
 const Chat = () => {
-  const ENDPT = 'http://localhost:5000'; // Ensure it's the full URL for the socket server
-
+  const ENDPT = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000'; // Environment variable
   const { user } = useContext(UserContext);
   const { room_id, room_name } = useParams();
   const [message, setMessage] = useState('');
@@ -17,7 +18,6 @@ const Chat = () => {
     socket = io(ENDPT);
     socket.emit('join', { name: user.name, room_id, user_id: user.id });
 
-    // Cleanup socket connection on component unmount
     return () => {
       socket.disconnect();
     };
@@ -25,10 +25,14 @@ const Chat = () => {
 
   useEffect(() => {
     socket.on('message', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
+      try {
+        console.log('Received message:', message);
+        setMessages((prevMessages) => [...prevMessages, message]);
+      } catch (error) {
+        console.error('Error processing message:', error);
+      }
     });
 
-    // Clean up listener on unmount
     return () => {
       socket.off('message');
     };
@@ -43,9 +47,8 @@ const Chat = () => {
 
   return (
     <div>
-      <div>{room_id} {room_name}</div>
-      <h1>Chat {JSON.stringify(user)}</h1>
-      <pre>{JSON.stringify(messages)}</pre>
+      <div>{room_id} - {room_name}</div>
+      <Messages messages={messages} user_id={user.id} />
       <form onSubmit={sendMessage}>
         <input
           type="text"

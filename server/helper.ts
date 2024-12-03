@@ -1,7 +1,7 @@
 interface User {
     socket_id: string;
     room_id: string;
-    user_id: number;
+    user_id: string;
     name: string;
 }
 

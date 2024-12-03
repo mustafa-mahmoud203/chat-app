@@ -41,7 +41,7 @@ const Home = () => {
   }
   const setAsMustafa = () => {
     const data = {
-      id: 1000,
+      id: "1000",
       name: "mustafa",
       age: 24,
       email: "mustafa@gamil.com"
@@ -50,7 +50,7 @@ const Home = () => {
   }
   const setAsHager = () => {
     const data = {
-      id: 2000,
+      id: "2000",
       name: "Hager",
       age: 10,
       email: "Hager@gamil.com"

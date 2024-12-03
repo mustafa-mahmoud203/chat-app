@@ -17,6 +17,8 @@ import DataBaseConnection from "./database/connection.js";
 import RoomController from './src/controllers/room.js';
 import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
+import { AppError } from './src/utils/customError.js';
+import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
 class App {
     constructor(helper, dbconnection, roomController, messageController) {
         this.helper = helper;
@@ -35,13 +37,23 @@ class App {
         });
         this.setMiddleware();
         this.setSocketIOEvents();
+        this.setErrorHandling();
     }
     setMiddleware() {
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(globalErrorHandling);
         this.app.use(cors({
             origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
             methods: ['GET', 'POST'],
             allowedHeaders: ['Content-Type'],
         }));
+    }
+    setErrorHandling() {
+        this.app.use("*", (req, res, next) => {
+            const error = new AppError("Not Found", 404);
+            next(error);
+        });
     }
     setSocketIOEvents() {
         new SocketHandlers(this.io, this.roomController, this.messageController, this.helper);

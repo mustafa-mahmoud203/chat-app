@@ -25,6 +25,7 @@ class MessageController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const messages = yield messageModel.find({});
+                // .populate("user_id")
                 return messages;
             }
             catch (err) {

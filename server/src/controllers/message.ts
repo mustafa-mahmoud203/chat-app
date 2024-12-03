@@ -13,6 +13,7 @@ class MessageController {
     public async messages(): Promise<IMessage[]> {
         try {
             const messages = await messageModel.find({})
+            // .populate("user_id")
             return messages
         } catch (err) {
             console.log(`Failed to retrieve messages: ${err}`);

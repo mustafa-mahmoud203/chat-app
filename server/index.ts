@@ -1,13 +1,17 @@
 import express, { Express } from 'express';
+import { Request, Response, NextFunction } from "express";
 import { createServer } from 'node:http';
 import { Server, Socket } from 'socket.io';
 import cors from 'cors';
 import 'dotenv/config';
+
 import Helper from './helper.js';
 import DataBaseConnection from "./database/connection.js"
 import RoomController from './src/controllers/room.js';
 import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
+import { AppError } from './src/utils/customError.js';
+import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
 class App {
     private app: Express;
     private port: number;
@@ -31,9 +35,13 @@ class App {
 
         this.setMiddleware();
         this.setSocketIOEvents();
+        this.setErrorHandling()
     }
 
     private setMiddleware(): void {
+        this.app.use(express.json());
+        this.app.use(express.urlencoded({ extended: true }));
+        this.app.use(globalErrorHandling);
         this.app.use(
             cors({
                 origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
@@ -42,6 +50,16 @@ class App {
             })
         );
     }
+
+    private setErrorHandling(): void {
+
+        this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
+            const error = new AppError("Not Found", 404);
+            next(error);
+        });
+
+    }
+
 
     private setSocketIOEvents(): void {
         new SocketHandlers(this.io, this.roomController, this.messageController, this.helper)

@@ -41,7 +41,7 @@ const Chat = () => {
   const sendMessage = (event) => {
     event.preventDefault();
     if (message.trim()) {
-      socket.emit('sendMessage', { message, room_id, user_id: user.id }, () => setMessage(''));
+      socket.emit('sendMessage', { text: message, room_id, user_id: user.id }, () => setMessage(''));
     }
   };
 

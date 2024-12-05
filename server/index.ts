@@ -12,6 +12,8 @@ import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
 import { AppError } from './src/utils/customError.js';
 import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
+
+import authRote from "./src/routes/auth.route.js"
 class App {
     private app: Express;
     private port: number;
@@ -34,6 +36,7 @@ class App {
         });
 
         this.setMiddleware();
+        this.initRoutes()
         this.setSocketIOEvents();
         this.setErrorHandling()
     }
@@ -51,6 +54,14 @@ class App {
         );
     }
 
+    private setSocketIOEvents(): void {
+        new SocketHandlers(this.io, this.roomController, this.messageController, this.helper)
+    }
+
+    private initRoutes(): void {
+        this.app.use("/auth", authRote);
+    }
+
     private setErrorHandling(): void {
 
         this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
@@ -59,12 +70,6 @@ class App {
         });
 
     }
-
-
-    private setSocketIOEvents(): void {
-        new SocketHandlers(this.io, this.roomController, this.messageController, this.helper)
-    }
-
     public async start(): Promise<void> {
         try {
             await this.dbconnection.connectionDB();

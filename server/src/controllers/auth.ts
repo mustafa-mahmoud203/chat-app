@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import BcryptFunctions from "src/utils/bcrypt.js";
 import { IUser, userModel } from "../../database/models/user.model.js"
-import { AppError } from "src/utils/customError.js";
-import Token, { IPayload } from "src/utils/token.js";
+import { AppError } from "../utils/customError.js";
+import Token, { IPayload } from "../utils/token.js";
 class AuthController {
 
     constructor(
@@ -30,7 +30,7 @@ class AuthController {
         }
 
     }
-    public async login(req: Request, res: Response, next: NextFunction) {
+    public async login(req: Request, res: Response, next: NextFunction): Promise<void | Response<any, Record<string, any>>> {
         try {
             const { email, password } = req.body
             const user: IUser | null = await userModel.findOne({ email })

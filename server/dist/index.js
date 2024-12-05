@@ -19,6 +19,7 @@ import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
 import { AppError } from './src/utils/customError.js';
 import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
+import authRote from "./src/routes/auth.route.js";
 class App {
     constructor(helper, dbconnection, roomController, messageController) {
         this.helper = helper;
@@ -36,6 +37,7 @@ class App {
             },
         });
         this.setMiddleware();
+        this.initRoutes();
         this.setSocketIOEvents();
         this.setErrorHandling();
     }
@@ -49,14 +51,17 @@ class App {
             allowedHeaders: ['Content-Type'],
         }));
     }
+    setSocketIOEvents() {
+        new SocketHandlers(this.io, this.roomController, this.messageController, this.helper);
+    }
+    initRoutes() {
+        this.app.use("/auth", authRote);
+    }
     setErrorHandling() {
         this.app.use("*", (req, res, next) => {
             const error = new AppError("Not Found", 404);
             next(error);
         });
-    }
-    setSocketIOEvents() {
-        new SocketHandlers(this.io, this.roomController, this.messageController, this.helper);
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {

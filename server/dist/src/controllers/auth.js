@@ -19,7 +19,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 import { userModel } from "../../database/models/user.model.js";
-import { AppError } from "src/utils/customError.js";
+import { AppError } from "../utils/customError.js";
 class AuthController {
     constructor(bcryptFunction, tokenFun) {
         this.bcryptFunction = bcryptFunction;

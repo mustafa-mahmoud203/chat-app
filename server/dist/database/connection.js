@@ -22,3 +22,4 @@ class DataBaseConnection {
     }
 }
 export default DataBaseConnection;
+//# sourceMappingURL=connection.js.map

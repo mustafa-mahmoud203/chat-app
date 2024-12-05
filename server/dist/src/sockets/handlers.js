@@ -49,7 +49,7 @@ class SocketHandlers {
     joinRoom(data, socket) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const { error, user } = this.helper.addUser(Object.assign({ socket_id: socket.id }, data));
+                const { error } = this.helper.addUser(Object.assign({ socket_id: socket.id }, data));
                 if (error)
                     throw new AppError(error.message || 'join error', 500);
                 // Ensure user is in the correct room

@@ -1,4 +1,3 @@
-import { error } from "console";
 import { roomModel, IRoom } from "../../database/models/room.model.js"
 class RoomController {
     public async createRoom(name: string): Promise<IRoom | null> {

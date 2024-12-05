@@ -44,7 +44,7 @@ class SocketHandlers {
     }
     private async joinRoom(data: { name: string, room_id: string, user_id: string }, socket: Socket) {
         try {
-            const { error, user } = this.helper.addUser({
+            const { error } = this.helper.addUser({
                 socket_id: socket.id,
                 ...data
             });

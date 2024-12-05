@@ -1,7 +1,7 @@
 import express, { Express } from 'express';
-import { Request, Response, NextFunction } from "express";
+import { NextFunction } from "express";
 import { createServer } from 'node:http';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import cors from 'cors';
 import 'dotenv/config';
 
@@ -64,7 +64,7 @@ class App {
 
     private setErrorHandling(): void {
 
-        this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
+        this.app.use("*", (next: NextFunction) => {
             const error = new AppError("Not Found", 404);
             next(error);
         });

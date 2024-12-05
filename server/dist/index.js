@@ -31,7 +31,7 @@ class App {
         this.server = createServer(this.app);
         this.io = new Server(this.server, {
             cors: {
-                origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
+                origin: process.env.FRONTEND_URL,
                 methods: ['GET', 'POST'],
                 allowedHeaders: ['Content-Type'],
             },
@@ -46,7 +46,7 @@ class App {
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(globalErrorHandling);
         this.app.use(cors({
-            origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
+            origin: process.env.FRONTEND_URL,
             methods: ['GET', 'POST'],
             allowedHeaders: ['Content-Type'],
         }));
@@ -58,7 +58,7 @@ class App {
         this.app.use("/auth", authRote);
     }
     setErrorHandling() {
-        this.app.use("*", (req, res, next) => {
+        this.app.use("*", (next) => {
             const error = new AppError("Not Found", 404);
             next(error);
         });
@@ -76,3 +76,4 @@ class App {
     }
 }
 new App(new Helper(), new DataBaseConnection(), new RoomController(), new MessageController()).start();
+//# sourceMappingURL=index.js.map

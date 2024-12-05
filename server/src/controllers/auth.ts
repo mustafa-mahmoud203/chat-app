@@ -19,7 +19,7 @@ class AuthController {
             }
             // if (req.file) data.profileImg = req.file.image;
 
-            data.password = this.bcryptFunction.hashPassword(password)
+            data.password = await this.bcryptFunction.hashPassword(password)
             const user: IUser | null = await userModel.create(data)
 
 

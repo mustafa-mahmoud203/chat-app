@@ -34,7 +34,7 @@ class AuthController {
                     return next(new AppError("email already exists....", 400));
                 }
                 // if (req.file) data.profileImg = req.file.image;
-                data.password = this.bcryptFunction.hashPassword(password);
+                data.password = yield this.bcryptFunction.hashPassword(password);
                 const user = yield userModel.create(data);
                 return res.status(201).json({ message: "Done", user });
             }

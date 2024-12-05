@@ -10,21 +10,23 @@ export interface IPayload {
 
 class Token {
     public jwtSign(payload: IPayload): string {
-        if (!process.env.TOKEN_SIGNATURE)
-            throw new Error("TOKEN_SIGNATURE is not defined in environment variables");
-        const token = jwt.sign(payload, process.env.TOKEN_SIGNATURE, { expiresIn: "30d" });
+        console.log("aaaaa ", process.env.TOKEN_SIGNTURE);
+
+        if (!process.env.TOKEN_SIGNTURE)
+            throw new Error("TOKEN_SIGNTURE is not defined in environment variables");
+        const token = jwt.sign(payload, process.env.TOKEN_SIGNTURE, { expiresIn: "30d" });
         return token;
     }
 
     public jwtVerify = (token: string = ""): string | jwt.JwtPayload => {
-        if (!process.env.TOKEN_SIGNATURE)
-            throw new Error("TOKEN_SIGNATURE is not defined in environment variables");
+        if (!process.env.TOKEN_SIGNTURE)
+            throw new Error("TOKEN_SIGNTURE is not defined in environment variables");
         try {
-            const decoded = jwt.verify(token, process.env.TOKEN_SIGNATURE)
+            const decoded = jwt.verify(token, process.env.TOKEN_SIGNTURE)
             return decoded;
         } catch (error) {
             throw new Error("Invalid or expired token");
-        }
+        }  
     };
 }
 

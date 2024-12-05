@@ -3,14 +3,15 @@ import React, { useContext, useEffect, useState } from 'react';
 import UserContext from '../../UserContext';
 import { useParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import Messages from './messages';
+import Messages from './messages/messages';
+import Input from './input/Input';
 
 let socket;
 
 const Chat = () => {
   const ENDPT = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000'; // Environment variable
   const { user } = useContext(UserContext);
-  const { room_id, room_name } = useParams();
+  const { room_id } = useParams();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
 
@@ -46,18 +47,15 @@ const Chat = () => {
   };
 
   return (
-    <div>
-      <div>{room_id} - {room_name}</div>
-      <Messages messages={messages} user_id={user.id} />
-      <form onSubmit={sendMessage}>
-        <input
-          type="text"
-          value={message}
-          onChange={(event) => setMessage(event.target.value)}
-          placeholder="Type your message"
+    <div className="outerContainer">
+      <div className="container">
+        <Messages messages={messages} user_id={user.id} />
+        <Input
+          message={message}
+          setMessage={setMessage}
+          sendMessage={sendMessage}
         />
-        <button type="submit">Send Message</button>
-      </form>
+      </div>
     </div>
   );
 };

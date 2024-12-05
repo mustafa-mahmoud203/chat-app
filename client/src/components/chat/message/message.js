@@ -1,8 +1,6 @@
 import React from 'react';
 import './message.css';
 const Message = ({ message: { name, user_id, text }, current_uid }) => {
-    console.log("name: ", name);
-
     let isCurrentUser = false;
     if (user_id === current_uid) {
         isCurrentUser = true;

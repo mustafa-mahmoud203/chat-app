@@ -1,14 +1,16 @@
 import React from 'react'
-import Message from './message/message'
-
+import Message from '..//message/message';
+import STB from 'react-scroll-to-bottom';
+import './messages.css';
 const Messages = ({ messages, user_id }) => {
     return (
-        <div>
-            {messages?.map((message, i) => (
+        <STB className="messages">
+
+            {messages.map((message, i) => (
                 <Message key={message._id} message={message} current_uid={user_id} />
             ))}
 
-        </div>
+        </STB>
     )
 }
 

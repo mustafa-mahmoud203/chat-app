@@ -21,8 +21,9 @@ var __rest = (this && this.__rest) || function (s, e) {
 import { userModel } from "../../database/models/user.model.js";
 import { AppError } from "src/utils/customError.js";
 class AuthController {
-    constructor(bcryptFunction) {
+    constructor(bcryptFunction, tokenFun) {
         this.bcryptFunction = bcryptFunction;
+        this.tokenFun = tokenFun;
     }
     signUp(req, res, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -38,10 +39,34 @@ class AuthController {
                 return res.status(201).json({ message: "Done", user });
             }
             catch (err) {
-                return next(new AppError("Internal server error", 500));
+                return next(new AppError(err.message, 500));
             }
         });
     }
-    login() { }
+    login(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { email, password } = req.body;
+                const user = yield userModel.findOne({ email });
+                if (!user)
+                    return next(new AppError("Invalid email or password", 400));
+                const checkpassword = yield this.bcryptFunction.comparePassword(password, user.password);
+                if (!checkpassword)
+                    return next(new AppError("invalid email or password", 400));
+                const payload = {
+                    userId: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    role: user.role
+                };
+                const token = this.tokenFun.jwtSign(payload);
+                return res.status(200).json({ message: "Done", token });
+            }
+            catch (err) {
+                return next(new AppError(err.message, 500));
+            }
+        });
+    }
 }
 export default AuthController;

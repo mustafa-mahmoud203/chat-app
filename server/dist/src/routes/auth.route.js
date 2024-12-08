@@ -12,7 +12,8 @@ class AuthRouters {
     }
     initRoutes() {
         this.router.post("/login", this.validation.login(), this.authController.login.bind(this.authController));
-        this.router.post("/signup", this.authController.signUp.bind(this.authController));
+        this.router.post("/signup", this.validation.signup(), this.authController.signUp.bind(this.authController));
     }
 }
-export default new AuthRouters(new AuthValidation(), new AuthController(new BcryptFunctions(), new Token())).router;
+const authController = new AuthController(new BcryptFunctions(), new Token());
+export default new AuthRouters(new AuthValidation(), authController).router;

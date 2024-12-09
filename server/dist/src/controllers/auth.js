@@ -49,10 +49,10 @@ class AuthController {
                 const { email, password } = req.body;
                 const user = yield userModel.findOne({ email });
                 if (!user)
-                    return next(new AppError("Invalid email or password", 400));
+                    return next(new AppError("Invalid email or password", 401));
                 const checkpassword = yield this.bcryptFunction.comparePassword(password, user.password);
                 if (!checkpassword)
-                    return next(new AppError("invalid email or password", 400));
+                    return next(new AppError("invalid email or password", 401));
                 const payload = {
                     userId: user.id,
                     name: user.name,

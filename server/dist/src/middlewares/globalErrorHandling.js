@@ -1,5 +1,5 @@
 class ErrorHandling {
-    static globalErrorHandling(err, req, res, next) {
+    globalErrorHandling(err, req, res, next) {
         const statusCode = err.statusCode || 500;
         const message = err.message || "Internal Server Error";
         if (err) {
@@ -12,4 +12,4 @@ class ErrorHandling {
         }
     }
 }
-export default ErrorHandling.globalErrorHandling;
+export default ErrorHandling;

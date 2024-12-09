@@ -34,11 +34,11 @@ class AuthController {
         try {
             const { email, password } = req.body
             const user: IUser | null = await userModel.findOne({ email })
-            if (!user) return next(new AppError("Invalid email or password", 400));
+            if (!user) return next(new AppError("Invalid email or password", 401));
 
             const checkpassword: boolean = await this.bcryptFunction.comparePassword(password, user.password)
 
-            if (!checkpassword) return next(new AppError("invalid email or password", 400));
+            if (!checkpassword) return next(new AppError("invalid email or password", 401));
 
             const payload: IPayload = {
                 userId: user.id,

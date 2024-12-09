@@ -12,10 +12,11 @@
     "types": [
       "node"
     ],
-    "noImplicitAny": true,
+    "noImplicitAny": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules"

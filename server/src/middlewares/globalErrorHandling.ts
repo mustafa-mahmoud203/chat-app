@@ -5,10 +5,12 @@ interface AppError extends Error {
 }
 
 class ErrorHandling {
-    public static globalErrorHandling(err: AppError, req: Request, res: Response, next: NextFunction): any {
+    public globalErrorHandling(err: AppError, req: Request, res: Response, next: NextFunction): any {
+
         const statusCode = err.statusCode || 500;
         const message = err.message || "Internal Server Error";
         if (err) {
+
             return res.status(statusCode).json({
                 status: "error",
                 statusCode,
@@ -18,4 +20,6 @@ class ErrorHandling {
         }
     }
 }
-export default ErrorHandling.globalErrorHandling 
+export default ErrorHandling
+
+

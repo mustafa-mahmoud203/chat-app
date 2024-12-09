@@ -18,20 +18,21 @@ import RoomController from './src/controllers/room.js';
 import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
 import { AppError } from './src/utils/customError.js';
-import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
 import authRote from "./src/routes/auth.route.js";
+import ErrorHandling from './src/middlewares/globalErrorHandling.js';
 class App {
-    constructor(helper, dbconnection, roomController, messageController) {
+    constructor(helper, dbconnection, roomController, messageController, errorHandling) {
         this.helper = helper;
         this.dbconnection = dbconnection;
         this.roomController = roomController;
         this.messageController = messageController;
+        this.errorHandling = errorHandling;
         this.app = express();
         this.port = parseInt(process.env.PORT || '5000', 10);
         this.server = createServer(this.app);
         this.io = new Server(this.server, {
             cors: {
-                origin: process.env.FRONTEND_URL,
+                origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
                 methods: ['GET', 'POST'],
                 allowedHeaders: ['Content-Type'],
             },
@@ -44,9 +45,8 @@ class App {
     setMiddleware() {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(globalErrorHandling);
         this.app.use(cors({
-            origin: process.env.FRONTEND_URL,
+            origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
             methods: ['GET', 'POST'],
             allowedHeaders: ['Content-Type'],
         }));
@@ -58,10 +58,10 @@ class App {
         this.app.use("/auth", authRote);
     }
     setErrorHandling() {
-        this.app.use("*", (next) => {
-            const error = new AppError("Not Found", 404);
-            next(error);
+        this.app.use("*", (req, res, next) => {
+            return next(new AppError("404 Page Not Found", 404));
         });
+        this.app.use(this.errorHandling.globalErrorHandling);
     }
     start() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -75,5 +75,4 @@ class App {
         });
     }
 }
-new App(new Helper(), new DataBaseConnection(), new RoomController(), new MessageController()).start();
-//# sourceMappingURL=index.js.map
+new App(new Helper(), new DataBaseConnection(), new RoomController(), new MessageController(), new ErrorHandling()).start();

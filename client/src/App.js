@@ -5,7 +5,7 @@ import UserContext from './UserContext.js'
 import Chat from './components/chat/chat.js';
 import Home from './components/home/home.js';
 import Navbar from './components/layout/Navbar.js';
-import Login from './components/auth/login';
+import Login from './components/auth/login/login.js';
 import Signup from './components/auth/signup/signup.js';
 function App() {
   const [user, setUser] = useState(null)

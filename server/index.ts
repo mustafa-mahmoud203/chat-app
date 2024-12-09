@@ -1,5 +1,4 @@
-import express, { Express } from 'express';
-import { NextFunction } from "express";
+import express, { Express, Request, Response, NextFunction } from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import cors from 'cors';
@@ -11,9 +10,10 @@ import RoomController from './src/controllers/room.js';
 import MessageController from './src/controllers/message.js';
 import SocketHandlers from './src/sockets/handlers.js';
 import { AppError } from './src/utils/customError.js';
-import globalErrorHandling from './src/middlewares/globalErrorHandling.js';
 
+import ErrorMiddleware from "./src/middlewares/globalErrorHandling.js"
 import authRote from "./src/routes/auth.route.js"
+import ErrorHandling from './src/middlewares/globalErrorHandling.js';
 class App {
     private app: Express;
     private port: number;
@@ -23,7 +23,9 @@ class App {
         private helper: Helper,
         private dbconnection: DataBaseConnection,
         private roomController: RoomController,
-        private messageController: MessageController) {
+        private messageController: MessageController,
+        private errorHandling: ErrorHandling
+    ) {
         this.app = express();
         this.port = parseInt(process.env.PORT || '5000', 10);
         this.server = createServer(this.app);
@@ -44,7 +46,6 @@ class App {
     private setMiddleware(): void {
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(globalErrorHandling);
         this.app.use(
             cors({
                 origin: process.env.FRONTEND_URL, // Allow only this origin (frontend)
@@ -60,14 +61,17 @@ class App {
 
     private initRoutes(): void {
         this.app.use("/auth", authRote);
+
     }
 
     private setErrorHandling(): void {
 
-        this.app.use("*", (next: NextFunction) => {
-            const error = new AppError("Not Found", 404);
-            next(error);
+        this.app.use("*", (req: Request, res: Response, next: NextFunction) => {
+            return next(new AppError("404 Page Not Found", 404));
         });
+
+
+        this.app.use(this.errorHandling.globalErrorHandling);
 
     }
     public async start(): Promise<void> {
@@ -86,5 +90,6 @@ new App(
     new Helper(),
     new DataBaseConnection(),
     new RoomController(),
-    new MessageController()
+    new MessageController(),
+    new ErrorHandling()
 ).start();
